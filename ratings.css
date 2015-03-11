@@ -1,0 +1,7 @@
+.showRatings {
+	background: rgba(255,255,255,0.5);
+    border: 1px solid;
+    cursor: pointer;
+    font-family: Calibri;
+    margin-left: 6px;
+}

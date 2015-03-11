@@ -1,0 +1,25 @@
+{
+	"manifest_version": 2,
+	"name": "Bear Ratings",
+	"version": "1.0",
+
+	"description": "Description goes here.",
+
+	"author": "Daniel Ni",
+	"background": {
+		"scripts": ["jquery-2.1.3.min.js", "ratings_events.js"],
+		"persistent": false
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://acadinfo.wustl.edu/CourseListings/Semester/Listing.aspx"],
+			"css": ["ratings.css"],
+			"js": ["jquery-2.1.3.min.js", "ratings_content.js"]
+		}
+	],
+	"permissions": [
+		"activeTab",
+		"http://www.ratemyprofessors.com/search.jsp*"
+	]
+
+}
