@@ -20,6 +20,10 @@
 	"permissions": [
 		"activeTab",
 		"http://www.ratemyprofessors.com/search.jsp*"
-	]
+	],
+	"icons": {
+        "48": "icon48.png",
+        "128": "icon128.png" 
+    }
 
 }
