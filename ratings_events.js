@@ -1,3 +1,8 @@
+// TODO:
+// Handle case with multiple professor results
+// Make second call async
+// 
+
 chrome.runtime.onMessage.addListener(
 	function(message, sender, sendResponse) {
 
@@ -29,25 +34,31 @@ chrome.runtime.onMessage.addListener(
 				var stats = {};
 				if (prof.length > 0) {
 					var page = prof.find('a').attr('href');
-					searches.push($.ajax({
+					$.ajax({
 						url			: "http://www.ratemyprofessors.com" + page,
 						type 		: 'GET',
 						dataType	: 'HTML',
+						async		: false,
 						success		: function(resp) {
 							var resp = $(resp);
+							var nameDiv = resp.find('.result-name').children().first();
 							var ratingsDiv = resp.find('.left-breakdown');
+							var numDiv = resp.find('.rating-count');
 							var breakdown = ratingsDiv.find('.breakdown-wrapper').children();
 							var details = ratingsDiv.find('.faux-slides').children();
+							stats.firstName = nameDiv.text().trim();
+							stats.count = numDiv.text().trim().split(' ')[0];
 							stats.overall = $(breakdown[0]).find('.grade').text();
 							stats.grade = $(breakdown[1]).find('.grade').text();
 							stats.helpfulness = $(details[0]).find('.rating').text();
 							stats.clarity = $(details[1]).find('.rating').text();
 							stats.easiness = $(details[2]).find('.rating').text();
+							stats.page = page;
+							ratings[professor] = stats;
 						}
-					}));
+					});
 				}
-				ratings[professor] = stats;
-				
+				// ratings[professor] = stats;
 			}
 		}
 
@@ -56,7 +67,6 @@ chrome.runtime.onMessage.addListener(
 		}
 
 		$.when.apply($, searches).done(function() {
-			console.log(searches);
 			// $.when.apply($, details).done(function() {
 				console.log(ratings);
 				sendResponse({'ratings': ratings});

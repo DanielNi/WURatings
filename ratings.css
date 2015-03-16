@@ -5,3 +5,55 @@
     font-family: Calibri;
     margin-left: 6px;
 }
+
+.bearRatings {
+    font-family: Calibri;
+    height: 200px;
+    width: 280px;
+    outline: gray solid thin;
+    margin-left: -300px;
+    float: left;
+}
+
+.brHeading {
+    font-size: 22px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    background: #D6D4FF;
+    outline: gray solid thin;
+}
+
+.numRatings, .brRatings1, .brRatings2 {
+    padding: 5px;
+    text-align: center;
+}
+
+.numRatings {
+    height: 30px;
+    line-height: 30px;
+}
+
+.brRatings1 {
+    height: 55px;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.brRatings1 .overall, .brRatings1 .grade {
+    display: table-cell;
+    text-align: center;
+}
+
+.brRatings2 {
+    height: 55px;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.brRatings2 .helpfulness, .brRatings2 .clarity, .brRatings2 .easiness {
+    display: table-cell;
+    text-align: center;
+}

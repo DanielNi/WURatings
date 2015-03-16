@@ -1,16 +1,47 @@
-// $("#Body_upResults #Body_oCourseList_tabSelect").prepend("<h1>TESTING</h1>");
+// TODO:
+// Fix on click handler problem
 
-// $("#Body_upResults").on("load", function() {
-// 	console.log($(this).find("#Body_oCourseList_viewSelect .CrsOpen .ResultTable"));
-// });
-
-// $(".SearchBox").on("click", function() {
-// 	console.log($(document).find("#Body_oCourseList_viewSelect .CrsOpen .ResultTable"));
-// });
 
 var ratings_content = (function($) {
 
 	var profs = [];
+
+	var ratingTable = 
+	'<div class="bearRatings">'+
+	    '<div class="brHeading">'+
+	    '</div>'+
+	    '<div class="numRatings">'+
+	    '</div>'+
+	    '<div class="brRatings1">'+
+	        '<div class="overall">'+
+	            '<div class="title">'+
+	                '<b>Overall Quality</b>'+
+	            '</div>'+
+	        '</div>'+
+	        '<div class="grade">'+
+	            '<div class="title">'+
+	                '<b>Average Grade</b>'+
+	            '</div>'+
+	        '</div>'+
+	    '</div>'+
+	    '<div class="brRatings2">'+
+	        '<div class="helpfulness">'+
+	            '<div class="title">'+
+	                '<b>Helpfulness</b>'+
+	            '</div>'+
+	        '</div>'+
+	        '<div class="clarity">'+
+	            '<div class="title">'+
+	                '<b>Clarity</b>'+
+	            '</div>'+
+	        '</div>'+
+	        '<div class="easiness">'+
+	            '<div class="title">'+
+	                '<b>Easiness</b>'+
+	            '</div>'+
+	        '</div>'+
+	    '</div>'+
+	'</div>';
 
 	var elements = {
 		acquire:function() {
@@ -29,25 +60,55 @@ var ratings_content = (function($) {
 
 		appendRatings:function(e) {
 			if ($(e.target).attr('id') == 'Body_divResults') {
-				var button = "<button class='showRatings'>Show rating</button>";
-				profResults = elements.results.find(".ResultTable .instructorLink");
-				profResults.after(button);
-
 				ev.getProfs();
 
 				chrome.runtime.sendMessage(profs, function(response) {
 					console.log(response);
+					var ratings = response.ratings;
+					var button = "<button class='showRatings'>Show rating</button>";
+					elements.profResults = elements.results.find(".ResultTable .instructorLink");
+					var withRatings = elements.profResults.filter(function(index) {
+						return $(elements.profResults[index]).text() in ratings;
+					});
+					withRatings.after(button);
+
+					withRatings.each(function(ind) {
+						customTable = $(ratingTable);
+						var profName = $(withRatings[ind]).text();
+						customTable.find('.brHeading').append("<a href=http://www.ratemyprofessors.com" 
+							+ ratings[profName].page + ">" + ratings[profName].firstName + " " + profName
+							+ "</a>");
+						customTable.find('.numRatings').append(ratings[profName].count + " ratings");
+						customTable.find('.overall').append(ratings[profName].overall);
+						customTable.find('.grade').append(ratings[profName].grade);
+						customTable.find('.helpfulness').append(ratings[profName].helpfulness);
+						customTable.find('.clarity').append(ratings[profName].clarity);
+						customTable.find('.easiness').append(ratings[profName].easiness);
+						$(withRatings[ind]).parents('.ResultTable').prepend(customTable);
+
+					});
+
+					// withRatings.parents('.ResultTable').prepend(ratingTable);
+
+
+
+					// $('button.showRatings').on('click', ev.toggleRatings);
 				});
 			}
 		},
 
 		getProfs:function() {
 			profs.length = 0;
-			profResults.each(function(ind) {
+			elements.profResults.each(function(ind) {
 				if (profs.indexOf($(this).text()) === -1) {
 					profs.push($(this).text());
 				}
 			});
+		},
+
+		toggleRatings:function(e) {
+			console.log("toggling");
+			$(this).parents('.ResultTable').find('.bearRatings').toggle();
 		}
 	};
 
