@@ -26,9 +26,19 @@ chrome.runtime.onMessage.addListener(
 					success		: function(response) {
 						var response = $(response);
 						var prof = response.find('.listing.PROFESSOR');
-						if (prof.length > 0) {
+						if (prof.length == 1) {
 							var page = prof.find('a').attr('href');
 							callback(professor, page);
+						} 
+						else if (prof.length > 1) {
+							var data = [];
+							prof.each(function(ind) {
+								var page = $(this).find('a').attr('href');
+								var name = $(this).find('.main').text();
+								var firstName = name.slice(name.indexOf(",") + 2, name.length);
+								data.push({'firstName': firstName, 'page': page});
+							});
+							callback(professor, data);
 						}
 					}
 				});
@@ -47,9 +57,22 @@ chrome.runtime.onMessage.addListener(
 			});
 
 
-		} else if (message.message == "specific professor") {
-			console.log(message);
-
+		} 
+		// else if (message.message == "get first name") {
+		// 	function getFirstName(lastName, page, callback) {
+		// 		return $.ajax({
+		// 			url			: page,
+		// 			type 		: 'GET',
+		// 			dataType 	: 'HTML',
+		// 			success 	: function(resp) {
+		// 				var name = $('#oInstructorResults_lblInstructorName').text().trim();
+		// 				console.log(name);
+		// 				sendResponse(name);
+		// 			}
+		// 		});
+		// 	}
+		// } 
+		else if (message.message == "specific professor") {
 			function getRatings(professor, page, callback) {
 				return $.ajax({
 					url			: "http://www.ratemyprofessors.com" + page,

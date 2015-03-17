@@ -14,6 +14,7 @@
     margin-left: -300px;
     float: left;
     background-color: white;
+    overflow: scroll;
 }
 
 .brHeading {
@@ -23,6 +24,10 @@
     text-align: center;
     background: #D6D4FF;
     outline: gray solid thin;
+}
+
+.professors {
+    padding: 5px;
 }
 
 .numRatings, .brRatings1, .brRatings2 {
