@@ -1,5 +1,5 @@
 // TODO:
-// Fix on click handler problem
+// Fix on click handler problem with other random thing catching event
 
 
 var ratings_content = (function($) {
@@ -55,6 +55,7 @@ var ratings_content = (function($) {
 	var ev = {
 		bind:function() {
 			elements.results.on('DOMNodeInserted', ev.appendRatings);
+			elements.results.on('click', 'button.showRatings', ev.toggleRatings);
 			// elements.courses.on('load', "div.ResultTable", ev.appendRatings);
 		},
 
@@ -75,7 +76,7 @@ var ratings_content = (function($) {
 
 					withRatings.each(function(ind) {
 						customTable = $(ratingTable);
-						var profName = $(withRatings[ind]).text();
+						var profName = $(this).text();
 
 						// handle the case where course listings has full prof name
 						var lastName = (profName.substr(0, profName.indexOf(" ")) == ratings[profName].firstName) ? profName.substr(profName.indexOf(" ") + 1, profName.length) : profName;
@@ -91,12 +92,10 @@ var ratings_content = (function($) {
 						customTable.find('.clarity').append(ratings[profName].clarity);
 						customTable.find('.easiness').append(ratings[profName].easiness);
 
-						if ($(withRatings[ind]).parents('.ResultTable').find('.profName').text() !== ratings[profName].firstName + " " + profName) {
-							$(withRatings[ind]).parents('.ResultTable').prepend(customTable);
+						if ($(this).parents('.ResultTable').find('.profName').text() !== ratings[profName].firstName + " " + profName) {
+							$(this).parents('.ResultTable').prepend(customTable);
 						}
 					});
-
-					$('button.showRatings').on('click', ev.toggleRatings);
 				});
 			}
 		},
@@ -116,12 +115,19 @@ var ratings_content = (function($) {
 			// only toggle ratings of the appropriate professor
 			$(this).parents('.ResultTable').find('.bearRatings .brHeading:contains(' + name + ')').parent().toggle();
 
-			if ($(this).text() == "Show rating") {
-				$(this).text("Hide rating");
-			} else {
-				$(this).text("Show rating");
-			}
-			e.stopPropagation();
+			var $containingTable = $(this).parents('table');
+			$containingTable.find('.ResultRow2').each(function(ind) {
+				var $prof = $(this).find('.instructorLink');
+				if ($prof.text() == name) {
+					var $button = $prof.next();
+					if ($button.text() == "Show rating") {
+						$button.text("Hide rating");
+					} else {
+						$button.text("Show rating");
+					}
+				}
+			});
+			e.stopPropagation(); // there's something on the page catching events or something, which is fucking shit up
 		}
 	};
 
