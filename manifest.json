@@ -3,7 +3,7 @@
 	"name": "Bear Ratings",
 	"version": "1.0",
 
-	"description": "Description goes here.",
+	"description": "View ratings from RateMyProfessors.com directly on the WUSTL course listings page.",
 
 	"author": "Daniel Ni",
 	"background": {

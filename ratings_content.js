@@ -59,6 +59,7 @@ var ratings_content = (function($) {
 		},
 
 		appendRatings:function(e) {
+			console.log("dom node inserted");
 			if ($(e.target).attr('id') == 'Body_divResults') {
 				ev.getProfs();
 
@@ -75,8 +76,13 @@ var ratings_content = (function($) {
 					withRatings.each(function(ind) {
 						customTable = $(ratingTable);
 						var profName = $(withRatings[ind]).text();
-						customTable.find('.brHeading').append("<a href=http://www.ratemyprofessors.com" 
-							+ ratings[profName].page + ">" + ratings[profName].firstName + " " + profName
+
+						// handle the case where course listings has full prof name
+						var lastName = (profName.substr(0, profName.indexOf(" ")) == ratings[profName].firstName) ? profName.substr(profName.indexOf(" ") + 1, profName.length) : profName;
+						
+						// add all the custom info to the ratingTable html
+						customTable.find('.brHeading').append("<a href='http://www.ratemyprofessors.com' class='profName'" 
+							+ ratings[profName].page + ">" + ratings[profName].firstName + " " + lastName
 							+ "</a>");
 						customTable.find('.numRatings').append(ratings[profName].count + " ratings");
 						customTable.find('.overall').append(ratings[profName].overall);
@@ -84,15 +90,13 @@ var ratings_content = (function($) {
 						customTable.find('.helpfulness').append(ratings[profName].helpfulness);
 						customTable.find('.clarity').append(ratings[profName].clarity);
 						customTable.find('.easiness').append(ratings[profName].easiness);
-						$(withRatings[ind]).parents('.ResultTable').prepend(customTable);
 
+						if ($(withRatings[ind]).parents('.ResultTable').find('.profName').text() !== ratings[profName].firstName + " " + profName) {
+							$(withRatings[ind]).parents('.ResultTable').prepend(customTable);
+						}
 					});
 
-					// withRatings.parents('.ResultTable').prepend(ratingTable);
-
-
-
-					// $('button.showRatings').on('click', ev.toggleRatings);
+					$('button.showRatings').on('click', ev.toggleRatings);
 				});
 			}
 		},
@@ -107,8 +111,17 @@ var ratings_content = (function($) {
 		},
 
 		toggleRatings:function(e) {
-			console.log("toggling");
-			$(this).parents('.ResultTable').find('.bearRatings').toggle();
+			var name = $(this).prev().text();
+
+			// only toggle ratings of the appropriate professor
+			$(this).parents('.ResultTable').find('.bearRatings .brHeading:contains(' + name + ')').parent().toggle();
+
+			if ($(this).text() == "Show rating") {
+				$(this).text("Hide rating");
+			} else {
+				$(this).text("Show rating");
+			}
+			e.stopPropagation();
 		}
 	};
 
