@@ -1,7 +1,6 @@
 // TODO:
 // Fix on click handler problem with other random thing catching event
 
-
 var ratings_content = (function($) {
 
 	var profs = [];
@@ -45,10 +44,9 @@ var ratings_content = (function($) {
 
 	var elements = {
 		acquire:function() {
-			this.window 		= $(window);
-			this.document		= $(document);
 			this.results 		= $("#Body_upResults");
 			this.profResults    = this.results.find(".ResultTable .instructorLink");
+			this.listeners 		= $(document).find("input:hidden");
 		}
 	};
 
@@ -56,16 +54,17 @@ var ratings_content = (function($) {
 		bind:function() {
 			elements.results.on('DOMNodeInserted', ev.appendRatings);
 			elements.results.on('click', 'button.showRatings', ev.toggleRatings);
-			// elements.courses.on('load', "div.ResultTable", ev.appendRatings);
 		},
 
 		appendRatings:function(e) {
-			console.log("dom node inserted");
 			if ($(e.target).attr('id') == 'Body_divResults') {
 				ev.getProfs();
+				$('#form1').children('span').css;
+
 
 				chrome.runtime.sendMessage(profs, function(response) {
 					console.log(response);
+
 					var ratings = response.ratings;
 					var button = "<button class='showRatings'>Show rating</button>";
 					elements.profResults = elements.results.find(".ResultTable .instructorLink");
@@ -127,7 +126,8 @@ var ratings_content = (function($) {
 					}
 				}
 			});
-			e.stopPropagation(); // there's something on the page catching events or something, which is fucking shit up
+			e.stopPropagation(); // there's something on the page catching events or something, which is messing stuff up
+
 		}
 	};
 
