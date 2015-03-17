@@ -4,6 +4,8 @@
 var ratings_content = (function($) {
 
 	var profs = [];
+	var withRatings;
+	var pages;
 
 	var ratingTable = 
 	'<div class="bearRatings">'+
@@ -46,7 +48,6 @@ var ratings_content = (function($) {
 		acquire:function() {
 			this.results 		= $("#Body_upResults");
 			this.profResults    = this.results.find(".ResultTable .instructorLink");
-			this.listeners 		= $(document).find("input:hidden");
 		}
 	};
 
@@ -58,43 +59,19 @@ var ratings_content = (function($) {
 
 		appendRatings:function(e) {
 			if ($(e.target).attr('id') == 'Body_divResults') {
+				elements.profResults = elements.results.find(".ResultTable .instructorLink");
 				ev.getProfs();
-				$('#form1').children('span').css;
+				// $('#form1').children('span').css;
 
+				chrome.runtime.sendMessage({'message': 'initial query', 'profs': profs}, function(response) {
+					pages = response;
 
-				chrome.runtime.sendMessage(profs, function(response) {
-					console.log(response);
-
-					var ratings = response.ratings;
 					var button = "<button class='showRatings'>Show rating</button>";
 					elements.profResults = elements.results.find(".ResultTable .instructorLink");
-					var withRatings = elements.profResults.filter(function(index) {
-						return $(elements.profResults[index]).text() in ratings;
+					withRatings = elements.profResults.filter(function(index) {
+						return $(elements.profResults[index]).text() in pages;
 					});
 					withRatings.after(button);
-
-					withRatings.each(function(ind) {
-						customTable = $(ratingTable);
-						var profName = $(this).text();
-
-						// handle the case where course listings has full prof name
-						var lastName = (profName.substr(0, profName.indexOf(" ")) == ratings[profName].firstName) ? profName.substr(profName.indexOf(" ") + 1, profName.length) : profName;
-						
-						// add all the custom info to the ratingTable html
-						customTable.find('.brHeading').append("<a href='http://www.ratemyprofessors.com' class='profName'" 
-							+ ratings[profName].page + ">" + ratings[profName].firstName + " " + lastName
-							+ "</a>");
-						customTable.find('.numRatings').append(ratings[profName].count + " ratings");
-						customTable.find('.overall').append(ratings[profName].overall);
-						customTable.find('.grade').append(ratings[profName].grade);
-						customTable.find('.helpfulness').append(ratings[profName].helpfulness);
-						customTable.find('.clarity').append(ratings[profName].clarity);
-						customTable.find('.easiness').append(ratings[profName].easiness);
-
-						if ($(this).parents('.ResultTable').find('.profName').text() !== ratings[profName].firstName + " " + profName) {
-							$(this).parents('.ResultTable').prepend(customTable);
-						}
-					});
 				});
 			}
 		},
@@ -109,15 +86,44 @@ var ratings_content = (function($) {
 		},
 
 		toggleRatings:function(e) {
-			var name = $(this).prev().text();
+			var $this = $(this);
+			var profName = $this.prev().text();
 
 			// only toggle ratings of the appropriate professor
-			$(this).parents('.ResultTable').find('.bearRatings .brHeading:contains(' + name + ')').parent().toggle();
+			$thisTable = $this.parents('.ResultTable').find('.bearRatings .brHeading:contains(' + profName + ')');
+			$thisTable.parent().toggle();
 
-			var $containingTable = $(this).parents('table');
+			if ($this.text() == "Show rating" && $thisTable.length == 0) {
+				var prof = {};
+				prof[profName] = pages[profName];
+				chrome.runtime.sendMessage({'message': 'specific professor', 'prof': prof}, function(ratings) {
+					console.log("got message back");
+					customTable = $(ratingTable);
+
+					// handle the case where course listings has full prof name
+					var lastName = (profName.substr(0, profName.indexOf(" ")) == ratings[profName].firstName) ? profName.substr(profName.indexOf(" ") + 1, profName.length) : profName;
+					
+					// add all the custom info to the ratingTable html
+					customTable.find('.brHeading').append("<a href='http://www.ratemyprofessors.com' class='profName'" 
+						+ ratings[profName].page + ">" + ratings[profName].firstName + " " + lastName
+						+ "</a>");
+					customTable.find('.numRatings').append(ratings[profName].count + " ratings");
+					customTable.find('.overall').append(ratings[profName].overall);
+					customTable.find('.grade').append(ratings[profName].grade);
+					customTable.find('.helpfulness').append(ratings[profName].helpfulness);
+					customTable.find('.clarity').append(ratings[profName].clarity);
+					customTable.find('.easiness').append(ratings[profName].easiness);
+
+					if ($this.parents('.ResultTable').find('.profName').text() !== ratings[profName].firstName + " " + profName) {
+						$this.parents('.ResultTable').prepend(customTable);
+					}
+				});
+			}
+
+			var $containingTable = $this.parents('.MainTableRow').parents('table').first();
 			$containingTable.find('.ResultRow2').each(function(ind) {
 				var $prof = $(this).find('.instructorLink');
-				if ($prof.text() == name) {
+				if ($prof.text() == profName) {
 					var $button = $prof.next();
 					if ($button.text() == "Show rating") {
 						$button.text("Hide rating");
