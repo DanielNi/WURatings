@@ -105,7 +105,7 @@ var ratings_content = (function($) {
 			// only toggle ratings of the appropriate professor
 			// $this.parents('.ResultTable').find('.bearRatings .brHeading:not(:contains(' + profName + '))').hide();
 			$thisTable = $this.parents('.ResultTable').find('.bearRatings .brHeading:contains(' + profName + ')');
-			$thisTable.parent().toggle();
+			$thisTable.parent().toggle().bringToTop();
 
 			if ($this.text() == "Show rating" && $thisTable.length == 0) {
 				// var prof = {};
@@ -120,6 +120,7 @@ var ratings_content = (function($) {
 					}
 
 					if ($this.parents('.ResultTable').find('.profName').text() !== profName) {
+						multTable.bringToTop();
 						$this.parents('.ResultTable').prepend(multTable);
 					}
 
@@ -184,6 +185,7 @@ var ratings_content = (function($) {
 				}
 
 				if (table.find('.profName').text() !== ratings[profName].firstName + " " + profName) {
+					customTable.bringToTop();
 					table.prepend(customTable);
 				}
 			});

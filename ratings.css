@@ -15,6 +15,7 @@
     float: left;
     background-color: white;
     overflow: auto;
+    position: absolute;
 }
 
 .brHeading {
