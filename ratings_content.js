@@ -49,7 +49,7 @@ var ratings_content = (function($) {
 		'<div class="brHeading">'+
 	    '</div>'+
 	    '<div class="professors">'+
-	    	'There are multiple professors with this last name.'+
+	    	'There are multiple professors with this last name at WashU.'+
 	    	'<ul>'+
 	   		'</ul>'+
 	    '</div>'+
@@ -113,8 +113,8 @@ var ratings_content = (function($) {
 
 					multTable.find('.brHeading').append("<div class='profName'>" + profName + "</div>");
 					for (var data in pages[profName]) {
-						multTable.find('ul').append("<li><a href=" + pages[profName][data].page + " target='_blank'>" 
-							+ pages[profName][data].firstName + " " + profName + "</a></li>");
+						multTable.find('ul').append("<li><a href='http://www.ratemyprofessors.com" + pages[profName][data].page 
+							+ "' target='_blank'>" + pages[profName][data].firstName + " " + profName + "</a></li>");
 					}
 
 					if ($this.parents('.ResultTable').find('.profName').text() !== profName) {
@@ -130,9 +130,9 @@ var ratings_content = (function($) {
 						var lastName = (profName.substr(0, profName.indexOf(" ")) == ratings[profName].firstName) ? profName.substr(profName.indexOf(" ") + 1, profName.length) : profName;
 						
 						// add all the custom info to the ratingTable html
-						customTable.find('.brHeading').append("<a href='http://www.ratemyprofessors.com' class='profName'" 
-							+ ratings[profName].page + ">" + ratings[profName].firstName + " " + lastName
-							+ "</a>");
+						customTable.find('.brHeading').append("<a href='http://www.ratemyprofessors.com" 
+							+ ratings[profName].page + "' class='profName' target='_blank'>" + ratings[profName].firstName
+							+ " " + lastName + "</a>");
 						customTable.find('.numRatings').append(ratings[profName].count + " ratings");
 						customTable.find('.overall').append(ratings[profName].overall);
 						customTable.find('.grade').append(ratings[profName].grade);
@@ -163,8 +163,30 @@ var ratings_content = (function($) {
 
 		},
 
-		makeRatingTable:function() {
+		makeRatingTable:function(profName) {
+			var prof = {};
+			prof[profName] = pages[profName];
+			chrome.runtime.sendMessage({'message': 'specific professor', 'prof': prof}, function(ratings) {
+				var customTable = $(ratingTable);
 
+				// handle the case where course listings has full prof name
+				var lastName = (profName.substr(0, profName.indexOf(" ")) == ratings[profName].firstName) ? profName.substr(profName.indexOf(" ") + 1, profName.length) : profName;
+				
+				// add all the custom info to the ratingTable html
+				customTable.find('.brHeading').append("<a href='http://www.ratemyprofessors.com' class='profName'" 
+					+ ratings[profName].page + ">" + ratings[profName].firstName + " " + lastName
+					+ "</a>");
+				customTable.find('.numRatings').append(ratings[profName].count + " ratings");
+				customTable.find('.overall').append(ratings[profName].overall);
+				customTable.find('.grade').append(ratings[profName].grade);
+				customTable.find('.helpfulness').append(ratings[profName].helpfulness);
+				customTable.find('.clarity').append(ratings[profName].clarity);
+				customTable.find('.easiness').append(ratings[profName].easiness);
+
+				if ($this.parents('.ResultTable').find('.profName').text() !== ratings[profName].firstName + " " + profName) {
+					$this.parents('.ResultTable').prepend(customTable);
+				}
+			});
 		},
 
 		replaceTable:function() {
