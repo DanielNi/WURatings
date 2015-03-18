@@ -1,7 +1,3 @@
-// TODO:
-// Handle case with multiple professor results
-// 
-
 chrome.runtime.onMessage.addListener(
 	function(message, sender, sendResponse) {
 

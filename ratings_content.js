@@ -66,6 +66,7 @@ var ratings_content = (function($) {
 		bind:function() {
 			elements.results.on('DOMNodeInserted', ev.appendRatings);
 			elements.results.on('click', 'button.showRatings', ev.toggleRatings);
+			elements.results.on('click', '.profOption', ev.replaceTable);
 		},
 
 		appendRatings:function(e) {
@@ -97,6 +98,7 @@ var ratings_content = (function($) {
 		},
 
 		toggleRatings:function(e) {
+			e.preventDefault();
 			var $this = $(this);
 			var profName = $this.prev().text();
 
@@ -105,7 +107,7 @@ var ratings_content = (function($) {
 			$thisTable.parent().toggle();
 
 			if ($this.text() == "Show rating" && $thisTable.length == 0) {
-				var prof = {};
+				// var prof = {};
 				if ($.isArray(pages[profName])) { // multiple profs with the same name
 					var multTable = $(multipleTable);
 
@@ -113,8 +115,7 @@ var ratings_content = (function($) {
 
 					multTable.find('.brHeading').append("<div class='profName'>" + profName + "</div>");
 					for (var data in pages[profName]) {
-						multTable.find('ul').append("<li><a href='http://www.ratemyprofessors.com" + pages[profName][data].page 
-							+ "' target='_blank'>" + pages[profName][data].firstName + " " + profName + "</a></li>");
+						multTable.find('ul').append("<li><span class='profOption'><span class='firstName'>" + pages[profName][data].firstName + "</span> <span class='lastName'>" + profName + "</span></span></li>");
 					}
 
 					if ($this.parents('.ResultTable').find('.profName').text() !== profName) {
@@ -122,28 +123,7 @@ var ratings_content = (function($) {
 					}
 
 				} else { // only one prof with this name
-					prof[profName] = pages[profName];
-					chrome.runtime.sendMessage({'message': 'specific professor', 'prof': prof}, function(ratings) {
-						var customTable = $(ratingTable);
-
-						// handle the case where course listings has full prof name
-						var lastName = (profName.substr(0, profName.indexOf(" ")) == ratings[profName].firstName) ? profName.substr(profName.indexOf(" ") + 1, profName.length) : profName;
-						
-						// add all the custom info to the ratingTable html
-						customTable.find('.brHeading').append("<a href='http://www.ratemyprofessors.com" 
-							+ ratings[profName].page + "' class='profName' target='_blank'>" + ratings[profName].firstName
-							+ " " + lastName + "</a>");
-						customTable.find('.numRatings').append(ratings[profName].count + " ratings");
-						customTable.find('.overall').append(ratings[profName].overall);
-						customTable.find('.grade').append(ratings[profName].grade);
-						customTable.find('.helpfulness').append(ratings[profName].helpfulness);
-						customTable.find('.clarity').append(ratings[profName].clarity);
-						customTable.find('.easiness').append(ratings[profName].easiness);
-
-						if ($this.parents('.ResultTable').find('.profName').text() !== ratings[profName].firstName + " " + profName) {
-							$this.parents('.ResultTable').prepend(customTable);
-						}
-					});
+					ev.makeRatingTable(profName, $this);
 				}
 			}
 
@@ -163,9 +143,20 @@ var ratings_content = (function($) {
 
 		},
 
-		makeRatingTable:function(profName) {
+		makeRatingTable:function(profName, button) {
 			var prof = {};
-			prof[profName] = pages[profName];
+			if (typeof profName == 'object') {
+				for (i = 0; i < pages[profName.lastName].length; i++) {
+					if (pages[profName.lastName][i].firstName == profName.firstName) {
+						prof[profName.lastName] = pages[profName.lastName][i].page;
+						break;
+					}
+				}
+				profName = profName.lastName;
+				
+			} else {
+				prof[profName] = pages[profName];
+			}
 			chrome.runtime.sendMessage({'message': 'specific professor', 'prof': prof}, function(ratings) {
 				var customTable = $(ratingTable);
 
@@ -183,14 +174,16 @@ var ratings_content = (function($) {
 				customTable.find('.clarity').append(ratings[profName].clarity);
 				customTable.find('.easiness').append(ratings[profName].easiness);
 
-				if ($this.parents('.ResultTable').find('.profName').text() !== ratings[profName].firstName + " " + profName) {
-					$this.parents('.ResultTable').prepend(customTable);
+				if (button.parents('.ResultTable').find('.profName').text() !== ratings[profName].firstName + " " + profName) {
+					button.parents('.ResultTable').prepend(customTable);
 				}
 			});
 		},
 
-		replaceTable:function() {
-
+		replaceTable:function(e) {
+			$.when(ev.makeRatingTable({firstName: $(this).find('span.firstName').text(), lastName: $(this).find('span.lastName').text()}, $(this))).done(function() {
+				$(this).parents('.ResultTable').find('.bearRatings').remove();
+			});
 		}
 	};
 

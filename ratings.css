@@ -30,6 +30,11 @@
     padding: 5px;
 }
 
+.profOption {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 .numRatings, .brRatings1, .brRatings2 {
     padding: 5px;
     text-align: center;
