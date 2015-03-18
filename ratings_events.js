@@ -83,6 +83,10 @@ chrome.runtime.onMessage.addListener(
 						var breakdown = ratingsDiv.find('.breakdown-wrapper').children();
 						var details = ratingsDiv.find('.faux-slides').children();
 						stats.firstName = nameDiv.text().trim();
+						if (stats.firstName === "") {
+							var name = resp.find('.rate-info.hidden-lg .name').text();
+							stats.firstName = name.substr(0, name.indexOf(" "));
+						}
 						stats.count = numDiv.text().trim().split(' ')[0];
 						stats.overall = $(breakdown[0]).find('.grade').text();
 						stats.grade = $(breakdown[1]).find('.grade').text();
